@@ -20,15 +20,17 @@ function onSearch(e) {
     picturesApiService.fetchPictures()
                 .then(auditResult).catch(() => {
             Notify.warning(`Error. Please try again.`);
-                    gallery.innerHTML = ``;
-                    
         });
 
 }
 
-function auditResult(array) {
-    if (array.length !== 0 ) {
-        renderGalleryCard(array);
+function auditResult({ hits, totalHits }) {
+    if (hits.length !== 0 ) {
+        renderGalleryCard(hits);
+    }
+    else if (picturesApiService.page === Math.ceil(totalHits / 40)) {
+        Notify.info(`We're sorry, but you've reached the end of search results.`);
+        loadMoreBtn.classList.add("hidden");
     }
     else {
         loadMoreBtn.classList.add("hidden");
@@ -53,5 +55,6 @@ function renderGalleryCard(array) {
 }
 
 function onLoadMore() {
-    picturesApiService.fetchPictures().then(renderGalleryCard);
+    picturesApiService.fetchPictures().then(auditResult);
 }
+
