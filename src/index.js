@@ -1,4 +1,5 @@
 import PicturesApiService from './fetchPictures.js'
+import './css/styles.css';
 import Notiflix, { Notify } from 'notiflix';
 
 
@@ -13,21 +14,24 @@ const picturesApiService = new PicturesApiService();
 
 function onSearch(e) {
     e.preventDefault();
+    gallery.innerHTML = ``;
     picturesApiService.query = e.currentTarget.elements.searchQuery.value;
     picturesApiService.resetPage();
     picturesApiService.fetchPictures()
-                .then(searchResult).catch(() => {
-            Notify.warning(`Sorry, there are no images matching your search query. Please try again.`);
-            gallery.innerHTML = ``;
+                .then(auditResult).catch(() => {
+            Notify.warning(`Error. Please try again.`);
+                    gallery.innerHTML = ``;
+                    
         });
 
 }
 
-function searchResult(array) {
+function auditResult(array) {
     if (array.length !== 0 ) {
         renderGalleryCard(array);
     }
     else {
+        loadMoreBtn.classList.add("hidden");
         Notify.info(`Sorry, there are no images matching your search query. Please try again.`);
     }
 }
@@ -35,7 +39,7 @@ function searchResult(array) {
 function renderGalleryCard(array) {
         const murkup = array.map(({webformatURL, largeImageURL, tags, likes, views, comments, downloads }) => {
             return `<div class="photo-card">
-  <img src="${webformatURL}" alt="${tags}" loading="lazy" />
+  <img src="${webformatURL}" alt="${tags}" loading="lazy" class="image" />
   <div class="info">
     <p class="info-item"><b>Likes</b> ${likes}</p>
     <p class="info-item"><b>Views</b> ${views}</p>
@@ -44,7 +48,8 @@ function renderGalleryCard(array) {
   </div>
 </div>`
             }).join("");
-            gallery.innerHTML = murkup;
+    gallery.insertAdjacentHTML("beforeend", murkup);
+    loadMoreBtn.classList.remove("hidden");
 }
 
 function onLoadMore() {
