@@ -1,7 +1,8 @@
 import PicturesApiService from './fetchPictures.js'
 import './css/styles.css';
 import Notiflix, { Notify } from 'notiflix';
-
+// import SimpleLightbox from "simplelightbox";
+import SimpleLightbox from "simplelightbox/dist/simple-lightbox.esm";
 
 const searchForm = document.querySelector("#search-form");
 const gallery = document.querySelector(".gallery");
@@ -27,6 +28,8 @@ function onSearch(e) {
 function auditResult({ hits, totalHits }) {
     if (hits.length !== 0 ) {
         renderGalleryCard(hits);
+            let lightbox = new SimpleLightbox('.gallery a', {captionDelay: 250});
+            // lightbox.refresh();
     }
     else if (picturesApiService.page === Math.ceil(totalHits / 40)) {
         Notify.info(`We're sorry, but you've reached the end of search results.`);
@@ -40,7 +43,7 @@ function auditResult({ hits, totalHits }) {
 
 function renderGalleryCard(array) {
         const murkup = array.map(({webformatURL, largeImageURL, tags, likes, views, comments, downloads }) => {
-            return `<div class="photo-card">
+            return `<a href="${webformatURL}"><div class="photo-card">
   <img src="${webformatURL}" alt="${tags}" loading="lazy" class="image" />
   <div class="info">
     <p class="info-item"><b>Likes</b> ${likes}</p>
@@ -48,7 +51,7 @@ function renderGalleryCard(array) {
     <p class="info-item"><b>Comments</b> ${comments}</p>
     <p class="info-item"><b>Downloads</b> ${downloads}</p>
   </div>
-</div>`
+</div></a>`
             }).join("");
     gallery.insertAdjacentHTML("beforeend", murkup);
     loadMoreBtn.classList.remove("hidden");
@@ -57,4 +60,5 @@ function renderGalleryCard(array) {
 function onLoadMore() {
     picturesApiService.fetchPictures().then(auditResult);
 }
+
 

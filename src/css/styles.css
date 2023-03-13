@@ -37,3 +37,7 @@ body {
 .info-item {
   margin: 2px;
 }
+a {
+  text-decoration: none;
+  color: black;
+}
