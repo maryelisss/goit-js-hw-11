@@ -1,0 +1,2 @@
+var t={fetchPictures:function(t){return fetch(`https://restcountries.com/v2/name/${t}`).then((t=>{if(!t.ok)throw new Error(t.status);return t.json()}))}};const e=document.querySelector("#search-form"),n=document.querySelector(".gallery");function r(t){}e.addEventListener("submit",(function(e){e.preventDefault();const c=e.target.value.trim();""!==c?t.fetchPictures(c).then(r).catch((()=>{Notify.warning("Oops, there is no country with that name"),n.innerHTML=""})):n.innerHTML=""}));
+//# sourceMappingURL=index.6fa2a266.js.map
