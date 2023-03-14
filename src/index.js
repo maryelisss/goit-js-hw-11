@@ -1,8 +1,8 @@
 import PicturesApiService from './fetchPictures.js'
 import './css/styles.css';
 import Notiflix, { Notify } from 'notiflix';
-// import SimpleLightbox from "simplelightbox";
-import SimpleLightbox from "simplelightbox/dist/simple-lightbox.esm";
+import SimpleLightbox from "simplelightbox";
+// import SimpleLightbox from "simplelightbox/dist/simple-lightbox.esm";
 
 const searchForm = document.querySelector("#search-form");
 const gallery = document.querySelector(".gallery");
