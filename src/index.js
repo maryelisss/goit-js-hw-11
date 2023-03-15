@@ -2,8 +2,9 @@ import PicturesApiService from './fetchPictures.js'
 import './css/styles.css';
 import Notiflix, { Notify } from 'notiflix';
 import SimpleLightbox from "simplelightbox";
-// import SimpleLightbox from "simplelightbox/dist/simple-lightbox.esm";
+import "simplelightbox/dist/simple-lightbox.min.css";
 
+let lightbox = new SimpleLightbox('.gallery a', {captionDelay: 250});
 const searchForm = document.querySelector("#search-form");
 const gallery = document.querySelector(".gallery");
 const loadMoreBtn = document.querySelector(".load-more")
@@ -13,32 +14,46 @@ loadMoreBtn.addEventListener("click", onLoadMore);
 
 const picturesApiService = new PicturesApiService();
 
-function onSearch(e) {
+async function onSearch(e) {
     e.preventDefault();
     gallery.innerHTML = ``;
-    picturesApiService.query = e.currentTarget.elements.searchQuery.value;
+    picturesApiService.query = e.currentTarget.elements.searchQuery.value.trim();
     picturesApiService.resetPage();
-    picturesApiService.fetchPictures()
-                .then(auditResult).catch(() => {
-            Notify.warning(`Error. Please try again.`);
-        });
-
+    try {
+        const { data: { hits, totalHits } } =
+            await picturesApiService.fetchPictures();
+        auditResult({ hits, totalHits });
+        numberOfResults(totalHits);
+    }
+    catch {
+        Notify.warning(`Error. Please try again.`);
+        console.log(error.massage);
+    }
 }
 
 function auditResult({ hits, totalHits }) {
-    if (hits.length !== 0 ) {
-        renderGalleryCard(hits);
-            let lightbox = new SimpleLightbox('.gallery a', {captionDelay: 250});
-            // lightbox.refresh();
-    }
-    else if (picturesApiService.page === Math.ceil(totalHits / 40)) {
-        Notify.info(`We're sorry, but you've reached the end of search results.`);
-        loadMoreBtn.classList.add("hidden");
-    }
-    else {
+    if (hits.length === 0 ) {
         loadMoreBtn.classList.add("hidden");
         Notify.info(`Sorry, there are no images matching your search query. Please try again.`);
+        return;
     }
+    else if (picturesApiService.page === Math.ceil(totalHits / 40)) {
+
+        renderGalleryCard(hits);
+        lightbox.refresh();
+        Notify.info(`We're sorry, but you've reached the end of search results.`);
+        loadMoreBtn.classList.add("hidden");
+        return;
+    }
+    else {
+        renderGalleryCard(hits);
+        lightbox.refresh();
+        return;
+    }
+}
+
+function numberOfResults(totalHits) {
+    Notify.success(`Hooray! We found ${totalHits} images.`);
 }
 
 function renderGalleryCard(array) {
@@ -55,10 +70,24 @@ function renderGalleryCard(array) {
             }).join("");
     gallery.insertAdjacentHTML("beforeend", murkup);
     loadMoreBtn.classList.remove("hidden");
+    
+    const { height: cardHeight } = document.querySelector(".gallery").firstElementChild.getBoundingClientRect();
+
+    window.scrollBy({
+    top: cardHeight * 2,
+    behavior: "smooth",
+    });
 }
 
-function onLoadMore() {
-    picturesApiService.fetchPictures().then(auditResult);
+async function onLoadMore() {
+    picturesApiService.incrementPage();
+    try {
+    const { data: { hits, totalHits } } = await
+        picturesApiService.fetchPictures()
+        auditResult({ hits, totalHits });
+    }
+    catch {
+        Notify.warning(`Error. Please try again.`);
+    }
 }
-
 

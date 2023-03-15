@@ -11,8 +11,7 @@ export default class PicturesApiService {
   async fetchPictures() {
   try {
     const response = await axios.get(`${BASE_URL}/${KEY}&q=${this.searchQuery}&image_type=photo&orientation=horizontal&safesearch=true&page=${this.page}&per_page=40`)
-    this.incrementPage();
-    return response.data;
+    return response;
 
   }
   catch (error) {
